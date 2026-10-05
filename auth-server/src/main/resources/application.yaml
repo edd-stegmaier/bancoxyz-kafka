@@ -1,0 +1,34 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: auth-server
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: ${ISSUER_URI:http://localhost:9000}
+        client:
+          bancoxyz-client:
+            registration:
+              client-id: bancoxyz-client
+              client-secret: "{noop}secret123"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - client_credentials
+              scopes:
+                - transacciones.read
+                - transacciones.write
+                - auditoria.read
+            require-authorization-consent: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.springframework.security: INFO

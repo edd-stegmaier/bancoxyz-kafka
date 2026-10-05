@@ -1,0 +1,67 @@
+{
+  "info": {
+    "name": "BancoXYZ Kafka OAuth2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "auth", "value": "http://localhost:9000"},
+    {"key": "producer", "value": "http://localhost:8080"},
+    {"key": "consumer", "value": "http://localhost:8081"},
+    {"key": "token", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Token client_credentials",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": ["const json = pm.response.json();", "pm.collectionVariables.set('token', json.access_token);"]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/x-www-form-urlencoded"}],
+        "auth": {"type": "basic", "basic": [{"key": "username", "value": "bancoxyz-client"}, {"key": "password", "value": "secret123"}]},
+        "body": {"mode": "urlencoded", "urlencoded": [
+          {"key": "grant_type", "value": "client_credentials"},
+          {"key": "scope", "value": "transacciones.read transacciones.write auditoria.read"}
+        ]},
+        "url": "{{auth}}/oauth2/token"
+      }
+    },
+    {
+      "name": "Crear transaccion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"},
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"cuentaId\": 1,\n  \"tipo\": \"RETIRO\",\n  \"monto\": 250000,\n  \"descripcion\": \"Transferencia alto monto\"\n}"},
+        "url": "{{producer}}/api/transacciones"
+      }
+    },
+    {
+      "name": "Listar cuentas",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": "{{producer}}/api/cuentas"
+      }
+    },
+    {
+      "name": "Auditoria",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": "{{consumer}}/api/auditoria"
+      }
+    },
+    {
+      "name": "Alertas",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": "{{consumer}}/api/alertas"
+      }
+    }
+  ]
+}
